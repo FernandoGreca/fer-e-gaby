@@ -75,7 +75,7 @@ Para instalar em outro projeto:
 3. Metatags de preço e moeda.
 4. Título HTML.
 
-Aceita somente HTTP/HTTPS nas portas padrão, sem credenciais. Bloqueia hosts locais, IPs privados/reservados e DNS que retorne qualquer IP não público. Conecta diretamente ao IP verificado, preservando Host e TLS/SNI, para impedir nova resolução DNS. Revalida cada redirecionamento (até três), limita a leitura a 2 MB e nove segundos e rejeita conteúdo não HTML/comprimido.
+Aceita somente HTTP/HTTPS nas portas padrão, sem credenciais. Bloqueia hosts locais, IPs privados/reservados e DNS que retorne qualquer IP não público. No Edge Runtime, usa conexão TCP nativa seguida de TLS com o nome original da loja. Isso mantém o IP verificado e preserva Host e TLS/SNI, sem nova resolução DNS. A camada de compatibilidade node:https do Supabase não preserva essa separação e não é usada em produção. Revalida cada redirecionamento (até três), limita a leitura a 2 MB e nove segundos e rejeita conteúdo não HTML/comprimido.
 
 A função valida o JWT em **Auth `/user`** e confere o UUID administrativo antes de ler a URL. `verify_jwt = false` desliga somente a validação legada do gateway; a autenticação é obrigatória no handler, compatível com as chaves atuais. Não se usa chave administrativa. CORS aceita somente `https://fernandogreca.github.io`, `http://localhost:3000` e `http://127.0.0.1:3000`.
 

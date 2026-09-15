@@ -1,3 +1,4 @@
+import { socketRequest, type SocketRuntime } from "./socket-transport.ts";
 import ipaddr from "ipaddr.js";
 import { resolve4, resolve6 } from "node:dns/promises";
 import { request as httpsRequest } from "node:https";
@@ -51,6 +52,8 @@ export async function pinnedRequest(
   ip: string,
   signal: AbortSignal,
 ): Promise<{ status: number; location?: string; html: string }> {
+  const runtime = (globalThis as unknown as { Deno?: SocketRuntime }).Deno;
+  if (runtime) return socketRequest(url, ip, signal, runtime);
   return new Promise((resolve, reject) => {
     const request = (url.protocol === "https:" ? httpsRequest : httpRequest)(
       {
