@@ -140,7 +140,7 @@ test("home has functional services and direct routes are accessible", async ({
     fullPage: true,
   });
   await page.locator(".service-card").filter({ hasText: "Galeria" }).click();
-  await expect(page).toHaveURL(/\/fer-e-gabi\/galeria\//);
+  await expect(page).toHaveURL(/\/fer-e-gaby\/galeria\//);
   await expect(page.getByRole("article").first()).toContainText(
     "Nosso passeio",
   );

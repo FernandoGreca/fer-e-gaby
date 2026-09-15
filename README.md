@@ -2,8 +2,8 @@
 
 Portal público do casal, com listas de presentes e galeria de fotos. Uma conta administrativa compartilhada cuida do conteúdo.
 
-- [Site publicado](https://fernandogreca.github.io/fer-e-gabi/)
-- [Repositório público](https://github.com/FernandoGreca/fer-e-gabi)
+- [Site publicado](https://fernandogreca.github.io/fer-e-gaby/)
+- [Repositório público](https://github.com/FernandoGreca/fer-e-gaby)
 - Supabase: projeto `gbhnuttdygjhdkulnpmi`, plano gratuito.
 
 ## Desenvolvimento
@@ -16,7 +16,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Abra `http://localhost:3000/fer-e-gabi/`. As rotas são `/`, `/presentes/` e `/galeria/`, sempre dentro de `/fer-e-gabi`. Next.js gera `out/` com HTML por rota, compatível com acesso direto e recarga no GitHub Pages. Ícone, manifest, links e assets incluem o mesmo caminho.
+Abra `http://localhost:3000/fer-e-gaby/`. As rotas são `/`, `/presentes/` e `/galeria/`, sempre dentro de `/fer-e-gaby`. Next.js gera `out/` com HTML por rota, compatível com acesso direto e recarga no GitHub Pages. Ícone, manifest, links e assets incluem o mesmo caminho.
 
 ```sh
 npm run lint
@@ -71,11 +71,11 @@ Execute `supabase/tests/rls.sql` e `supabase/tests/gallery-rls.sql` por uma cone
 
 ## Publicação
 
-Remote: `git@github.com:FernandoGreca/fer-e-gabi.git`. O repositório deve continuar público. GitHub Pages usa **Settings → Pages → Source → GitHub Actions**, com HTTPS.
+Remote: `git@github.com:FernandoGreca/fer-e-gaby.git`. O repositório deve continuar público. GitHub Pages usa **Settings → Pages → Source → GitHub Actions**, com HTTPS.
 
 O workflow `.github/workflows/pages.yml` executa lint, tipos, unitários, build e E2E. Após sucesso em `main`, publica `out/`. Usa `GITHUB_TOKEN` automático com permissões de deploy somente no job correspondente. Migrations são aplicadas separadamente via Supabase; não há backend Next.js no Pages.
 
-A URL de Auth no Supabase é `https://fernandogreca.github.io/fer-e-gabi/`. Para outro projeto, crie a conta administrativa no painel, desabilite novos cadastros, ajuste o e-mail nas migrations/configuração e aplique as migrations. Nunca adicione segredos a `NEXT_PUBLIC_*`.
+A URL de Auth no Supabase é `https://fernandogreca.github.io/fer-e-gaby/`. Para outro projeto, crie a conta administrativa no painel, desabilite novos cadastros, ajuste o e-mail nas migrations/configuração e aplique as migrations. Nunca adicione segredos a `NEXT_PUBLIC_*`.
 
 ## Verificações e limites
 

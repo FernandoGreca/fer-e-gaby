@@ -4,7 +4,7 @@ import { Portal } from "@/components/portal";
 export const metadata: Metadata = {
   title: "Fer + Gaby",
   icons: {
-    icon: (process.env.NEXT_PUBLIC_BASE_PATH ?? "/fer-e-gabi") + "/icon.svg",
+    icon: (process.env.NEXT_PUBLIC_BASE_PATH ?? "/fer-e-gaby") + "/icon.svg",
   },
   description: "Nosso cantinho de desejos, memórias e momentos compartilhados.",
 };

@@ -1,5 +1,5 @@
 {
-  "name": "fer-e-gabi",
+  "name": "fer-e-gaby",
   "version": "1.0.0",
   "description": "Portal de Fer + Gaby com listas de presentes e galeria de fotos",
   "main": "index.js",
@@ -15,15 +15,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/FernandoGreca/fer-e-gabi.git"
+    "url": "git+https://github.com/FernandoGreca/fer-e-gaby.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/FernandoGreca/fer-e-gabi/issues"
+    "url": "https://github.com/FernandoGreca/fer-e-gaby/issues"
   },
-  "homepage": "https://fernandogreca.github.io/fer-e-gabi/",
+  "homepage": "https://fernandogreca.github.io/fer-e-gaby/",
   "dependencies": {
     "@hookform/resolvers": "5.9.1",
     "@radix-ui/react-dialog": "1.1.23",

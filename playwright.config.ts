@@ -4,7 +4,7 @@ export default defineConfig({
   fullyParallel: true,
   workers: 2,
   use: {
-    baseURL: "http://localhost:3000/fer-e-gabi/",
+    baseURL: "http://localhost:3000/fer-e-gaby/",
     trace: "retain-on-failure",
   },
   projects: [
@@ -16,7 +16,7 @@ export default defineConfig({
   ],
   webServer: {
     command: "node scripts/serve-static.mjs",
-    url: "http://localhost:3000/fer-e-gabi/",
+    url: "http://localhost:3000/fer-e-gaby/",
     reuseExistingServer: !process.env.CI,
   },
   reporter: [["list"], ["html", { open: "never" }]],

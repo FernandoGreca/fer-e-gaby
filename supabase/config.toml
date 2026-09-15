@@ -1,7 +1,7 @@
-project_id = "fer-e-gabi"
+project_id = "fer-e-gaby"
 
 [auth]
-site_url = "https://fernandogreca.github.io/fer-e-gabi/"
-additional_redirect_urls = ["http://localhost:3000/fer-e-gabi/"]
+site_url = "https://fernandogreca.github.io/fer-e-gaby/"
+additional_redirect_urls = ["http://localhost:3000/fer-e-gaby/"]
 enable_signup = false
 enable_anonymous_sign_ins = false
