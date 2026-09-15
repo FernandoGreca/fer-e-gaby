@@ -58,8 +58,8 @@ O cliente usa somente URL e chave publicável do Supabase. A função SQL `is_ad
 
 ## Migrations e políticas
 
-- `20260915152001_initial_wishlists.sql`: duas listas fixas, tabela `gifts`, enums, índices, normalização e datas, leitura pública e escrita limitada ao administrador.
-- `20260915172429_portal_gallery.sql`: `gallery_photos`, `gallery_cleanup`, índices, constraints, triggers e `is_admin()`. Resolve a conta existente por e-mail diretamente em `auth.users`, sem modificar credenciais ou presentes.
+- `20260915152047_initial_wishlists.sql`: duas listas fixas, tabela `gifts`, enums, índices, normalização e datas, leitura pública e escrita limitada ao administrador.
+- `20260915172949_portal_gallery.sql`: `gallery_photos`, `gallery_cleanup`, índices, constraints, triggers e `is_admin()`. Resolve a conta existente por e-mail diretamente em `auth.users`, sem modificar credenciais ou presentes.
 
 Em `gallery_photos`, `public_read` permite SELECT público; `admin_insert`, `admin_update` (USING + WITH CHECK) e `admin_delete` restringem escrita ao UID administrativo. Em `gallery_cleanup`, SELECT/INSERT/DELETE são exclusivos do administrador.
 
