@@ -1,0 +1,33 @@
+name: Supabase public health check
+
+on:
+  schedule:
+    # UTC: 03:17, 09:17, 15:17, 21:17 (00:17, 06:17, 12:17, 18:17 em Brasília).
+    - cron: "17 3,9,15,21 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/supabase-health.yml
+      - scripts/check-supabase.sh
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-public-health
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Query public data
+        env:
+          SUPABASE_URL: https://gbhnuttdygjhdkulnpmi.supabase.co
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_h9DYDI5tNHP6m70uGZgs-g_ZKdiPleX
+        run: bash scripts/check-supabase.sh

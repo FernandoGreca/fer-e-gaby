@@ -77,6 +77,18 @@ O workflow `.github/workflows/pages.yml` executa lint, tipos, unitários, build 
 
 A URL de Auth no Supabase é `https://fernandogreca.github.io/fer-e-gaby/`. Para outro projeto, crie a conta administrativa no painel, desabilite novos cadastros, ajuste o e-mail nas migrations/configuração e aplique as migrations. Nunca adicione segredos a `NEXT_PUBLIC_*`.
 
+## Verificação agendada do Supabase
+
+O workflow [Supabase public health check](https://github.com/FernandoGreca/fer-e-gaby/actions/workflows/supabase-health.yml) executa todos os dias às **00:17, 06:17, 12:17 e 18:17 de Brasília** (03:17, 09:17, 15:17 e 21:17 UTC). Também pode ser iniciado em **Actions → Supabase public health check → Run workflow** e roda quando seu script ou configuração são publicados em `main`.
+
+Cada execução faz duas consultas GET: busca somente o `id` de, no máximo, uma linha pública de `wishlists` e de `gallery_photos`. Usa a chave publicável, sem sessão administrativa, alterações nos dados, download de fotos ou deploy. Aceita tabelas vazias, valida o formato da resposta e falha em erros HTTP, de rede ou conteúdo inválido. Há timeout e até duas novas tentativas para falhas transitórias. Os logs não exibem os registros retornados. Notificações de falha seguem as preferências de GitHub Actions da conta.
+
+Essas consultas geram atividade no banco e ajudam a evitar a pausa do plano gratuito, sem garantir disponibilidade contínua. O [Supabase avalia a atividade durante sete dias](https://supabase.com/docs/guides/platform/free-project-pausing). Se o projeto já estiver pausado, reative-o no painel com **Resume project**; a consulta não o reativa.
+
+O [GitHub pode atrasar execuções e desativa agendamentos após 60 dias sem atividade no repositório público](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule). Visitas ao site e cadastros de fotos não atualizam o repositório. Se isso acontecer, acesse o workflow em Actions e use **Enable workflow**. Nenhum commit artificial é gerado pela tarefa.
+
+Para executar localmente, exporte `SUPABASE_URL` e `SUPABASE_PUBLISHABLE_KEY` com os valores públicos do workflow e rode `bash scripts/check-supabase.sh`. Requer Bash, curl e jq, já disponíveis no runner Ubuntu do GitHub.
+
 ## Verificações e limites
 
 - Unitários: presentes, datas, ordenação da galeria, tipos/tamanho de arquivo, proporção e caminhos seguros.
