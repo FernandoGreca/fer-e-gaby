@@ -44,17 +44,24 @@ const invalid = await db.auth.signInWithPassword({
   password: "deliberately-invalid-test-password",
 });
 assert.ok(invalid.error);
-const edge = await fetch(SUPABASE_URL + "/functions/v1/extract-product", {
-  method: "POST",
-  headers: { apikey: SUPABASE_KEY, "Content-Type": "application/json" },
-  body: JSON.stringify({ url: "https://example.com" }),
-});
-assert.equal(edge.status, 401);
-const cors = await fetch(SUPABASE_URL + "/functions/v1/extract-product", {
-  method: "OPTIONS",
-  headers: { Origin: "https://untrusted.example" },
-});
-assert.equal(cors.status, 403);
+const gallery = await db.from("gallery_photos").select("*");
+assert.equal(gallery.error, null);
+const admin = await db.rpc("is_admin");
+assert.equal(admin.data, false);
+for (const table of ["gallery_photos", "gallery_cleanup"]) {
+  const result = await db.from(table).insert({
+    object_path: "00000000-0000-4000-8000-000000000001.webp",
+    photo_date: "2026-09-15",
+  });
+  assert.ok(result.error, "Public gallery writes must be denied");
+}
+const upload = await db.storage
+  .from("couple-gallery")
+  .upload(
+    "00000000-0000-4000-8000-000000000001.webp",
+    new Blob(["denied"], { type: "image/webp" }),
+  );
+assert.ok(upload.error, "Anonymous storage upload must be denied");
 console.log(
-  "PASS: public reads, denied writes, disabled signup, invalid login, Edge auth and CORS.",
+  "PASS: public lists/gallery, denied writes/storage upload, admin RPC false, signup disabled, invalid login.",
 );

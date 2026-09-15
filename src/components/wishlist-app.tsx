@@ -1,21 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { useEffect, useState } from "react";
-import {
-  QueryClient,
-  QueryClientProvider,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowUpRight,
   Check,
   Gift as GiftIcon,
   Heart,
   History,
-  LockKeyhole,
-  LogOut,
   Plus,
   SlidersHorizontal,
   Sparkles,
@@ -24,7 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { ADMIN_EMAIL, ADMIN_ID } from "@/lib/config";
+import { useAuth } from "./portal";
 import {
   emptyFilters,
   giftPayload,
@@ -38,19 +30,6 @@ import {
 import { Modal } from "./modal";
 import { GiftForm } from "./gift-form";
 
-export function WishlistApp() {
-  const [client] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: { queries: { staleTime: 30000, retry: 1 } },
-      }),
-  );
-  return (
-    <QueryClientProvider client={client}>
-      <App />
-    </QueryClientProvider>
-  );
-}
 function GiftImage({ url, name }: { url: string; name: string }) {
   const [failed, setFailed] = useState(false);
   return (
@@ -72,13 +51,9 @@ function GiftImage({ url, name }: { url: string; name: string }) {
     </div>
   );
 }
-function App() {
+export function WishlistApp() {
   const queryClient = useQueryClient();
-  const [admin, setAdmin] = useState(false),
-    [login, setLogin] = useState(false),
-    [password, setPassword] = useState(""),
-    [loginBusy, setLoginBusy] = useState(false),
-    [loginError, setLoginError] = useState("");
+  const { admin } = useAuth();
   const [slug, setSlug] = useState("fer"),
     [history, setHistory] = useState(false),
     [filters, setFilters] = useState(emptyFilters),
@@ -90,19 +65,6 @@ function App() {
     } | null>(null),
     [message, setMessage] = useState(""),
     [failure, setFailure] = useState("");
-  useEffect(() => {
-    let active = true;
-    void supabase.auth.getSession().then(({ data }) => {
-      if (active) setAdmin(data.session?.user.id === ADMIN_ID);
-    });
-    const { data } = supabase.auth.onAuthStateChange((_event, session) =>
-      setAdmin(session?.user.id === ADMIN_ID),
-    );
-    return () => {
-      active = false;
-      data.subscription.unsubscribe();
-    };
-  }, []);
   const lists = useQuery({
     queryKey: ["wishlists"],
     queryFn: async () => {
@@ -206,43 +168,6 @@ function App() {
         "Não foi possível salvar a alteração. Verifique sua conexão e se a sessão ainda está ativa; tente novamente.",
       ),
   });
-  async function signIn(event: React.FormEvent) {
-    event.preventDefault();
-    setLoginBusy(true);
-    setLoginError("");
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: ADMIN_EMAIL,
-        password,
-      });
-      setPassword("");
-      if (error || data.user?.id !== ADMIN_ID) {
-        if (data.session) await supabase.auth.signOut();
-        setLoginError(
-          "Não foi possível entrar. Confira a senha e tente novamente.",
-        );
-        return;
-      }
-      setLogin(false);
-      setMessage("Modo de edição ativado.");
-    } catch {
-      setPassword("");
-      setLoginError("Sem conexão. Tente novamente.");
-    } finally {
-      setLoginBusy(false);
-    }
-  }
-  async function signOut() {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      setFailure("Não foi possível encerrar a sessão. Tente novamente.");
-      return;
-    }
-    setAdmin(false);
-    setEditor(null);
-    setConfirm(null);
-    setMessage("Sessão encerrada.");
-  }
   function changeList(value: string) {
     setSlug(value);
     setFilters(emptyFilters);
@@ -250,48 +175,7 @@ function App() {
   const activeFilters = Object.values(filters).some(Boolean);
   return (
     <>
-      <a className="skip-link" href="#listas">
-        Ir para as listas
-      </a>
-      <header className="site-header">
-        <a href="#" className="brand" aria-label="Fer mais Gaby, início">
-          <Heart size={22} strokeWidth={1.5} />
-          <span>
-            Fer <i>+</i> Gaby
-          </span>
-        </a>
-        <div className="header-actions">
-          <button
-            className={`text-button ${history ? "selected" : ""}`}
-            onClick={() => {
-              setHistory(!history);
-              setFilters(emptyFilters);
-            }}
-          >
-            <History size={17} />
-            {history ? "Ver desejos" : "Já ganhamos"}
-          </button>
-          {admin ? (
-            <button className="text-button" onClick={() => void signOut()}>
-              <LogOut size={16} />
-              <span>Sair</span>
-            </button>
-          ) : (
-            <button
-              className="text-button edit-entry"
-              aria-label="Modo de edição"
-              onClick={() => {
-                setLogin(true);
-                setLoginError("");
-              }}
-            >
-              <LockKeyhole size={15} />
-              <span>Modo de edição</span>
-            </button>
-          )}
-        </div>
-      </header>
-      <main>
+      <main id="conteudo">
         <section className="hero">
           <span className="eyebrow">
             <span /> NOSSO CANTINHO DE DESEJOS <span />
@@ -382,6 +266,16 @@ function App() {
               </h2>
             </div>
             <div className="list-actions">
+              <button
+                className="button secondary"
+                onClick={() => {
+                  setHistory(!history);
+                  setFilters(emptyFilters);
+                }}
+              >
+                <History size={17} />
+                {history ? "Ver desejos" : "Já ganhamos"}
+              </button>
               <button
                 className="button secondary filter-toggle"
                 aria-expanded={filtersOpen}
@@ -697,45 +591,6 @@ function App() {
           </p>
         </aside>
       </main>
-      <footer>
-        <span>
-          Fer <i>+</i> Gaby
-        </span>
-        <p>Feito com amor, para compartilhar sorrisos.</p>
-        <Heart size={14} />
-      </footer>
-      {login && (
-        <Modal
-          title="Nosso modo de edição"
-          description="Entre com a senha compartilhada para cuidar das duas listas."
-          onClose={() => {
-            setLogin(false);
-            setPassword("");
-          }}
-        >
-          <form onSubmit={signIn}>
-            <label className="field">
-              Senha
-              <input
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </label>
-            {loginError && (
-              <p role="alert" className="field-error">
-                {loginError}
-              </p>
-            )}
-            <button className="button full" disabled={loginBusy}>
-              {loginBusy ? "Entrando…" : "Entrar"}
-              <ArrowUpRight size={17} />
-            </button>
-          </form>
-        </Modal>
-      )}
       {editor && admin && list && (
         <GiftForm
           gift={editor === "new" ? undefined : editor}

@@ -1,4 +1,3 @@
-export const ADMIN_ID = "8d1f2d09-d1c2-4c7c-ac31-edac11ca8226";
 export const ADMIN_EMAIL = "fernando.greca@integra.do";
 export const SUPABASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL ??

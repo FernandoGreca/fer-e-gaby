@@ -1,14 +1,14 @@
 # Fer + Gaby
 
-Lista de presentes pública de Fer e Gaby, com edição por uma única conta administrativa.
+Portal público do casal, com listas de presentes e galeria de fotos. Uma conta administrativa compartilhada cuida do conteúdo.
 
-- **Site:** https://fernandogreca.github.io/lista-de-presentes/
-- **Repositório:** https://github.com/FernandoGreca/lista-de-presentes
-- **Supabase:** projeto `gbhnuttdygjhdkulnpmi`
+- [Site publicado](https://fernandogreca.github.io/fer-e-gabi/)
+- [Repositório público](https://github.com/FernandoGreca/fer-e-gabi)
+- Supabase: projeto `gbhnuttdygjhdkulnpmi`, plano gratuito.
 
 ## Desenvolvimento
 
-Requisitos: Node.js 22 e npm.
+Node.js 22 e npm, com versões fixadas no lockfile.
 
 ```sh
 npm ci
@@ -16,7 +16,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Abra `http://localhost:3000/lista-de-presentes/`. O caminho também é usado na exportação, nos testes e no GitHub Pages.
+Abra `http://localhost:3000/fer-e-gabi/`. As rotas são `/`, `/presentes/` e `/galeria/`, sempre dentro de `/fer-e-gabi`. Next.js gera `out/` com HTML por rota, compatível com acesso direto e recarga no GitHub Pages. Ícone, manifest, links e assets incluem o mesmo caminho.
 
 ```sh
 npm run lint
@@ -28,79 +28,60 @@ npm run test:e2e
 npm run test:public
 ```
 
-`npm run build` gera `out/`. Para conferir exatamente os arquivos publicados, execute `node scripts/serve-static.mjs`.
+Para visualizar a exportação: `node scripts/serve-static.mjs`.
 
 ## Uso
 
-Escolha **Lista presentes Fer** ou **Lista presentes Gaby**. Os desejos são ordenados por prioridade e, em caso de empate, pelos mais recentes. Combine filtros de prioridade, preço e etiqueta. Preços desconhecidos ficam fora de filtros numéricos. O preço é filtrado no valor da moeda cadastrada; não há conversão cambial.
+A página inicial reúne **Lista de presentes** e **Galeria**. O menu permite voltar ao início ou trocar de serviço. Novos serviços podem ser registrados em `src/lib/services.ts`; cada registro alimenta os cards e a navegação.
 
-**Já ganhamos** abre o histórico, ordenado pela data de recebimento. **Modo de edição** solicita somente a senha compartilhada. A sessão persiste neste navegador; use **Sair** ao terminar em dispositivos compartilhados.
+### Presentes
 
-No modo de edição é possível cadastrar, editar, excluir e marcar como ganho. O formulário aceita cadastro manual completo. Colar um link inicia a tentativa de extração; **Preencher pelo link** permite repetir. Dados preenchidos manualmente e alterações feitas durante a busca são preservados. Imagens indisponíveis exibem um placeholder.
+As abas **Lista presentes Fer** e **Lista presentes Gaby** mantêm desejos, prioridades, preço/moeda, etiquetas, descrição, observações e histórico **Já ganhamos**. Filtros podem ser combinados; o preço é comparado na moeda cadastrada, sem conversão cambial. Presentes recebidos são ordenados pela data de recebimento.
 
-## Arquitetura
+O cadastro é inteiramente manual. Link HTTP/HTTPS é obrigatório. Colar ou modificar o link não busca informações em lojas. Nome, imagem e preço são informados pelo administrador. Imagens externas indisponíveis mostram uma alternativa visual.
 
-Next.js App Router + TypeScript, exportação estática, Tailwind CSS, TanStack Query, React Hook Form + Zod, Radix Dialog, Supabase Auth/Postgres e Edge Function.
+### Galeria
 
-Não há servidor Next.js na hospedagem. As imagens são URLs externas sem otimização de servidor. O cliente consulta diretamente o Supabase com a chave publicável. Não há reservas nem intenção de compra.
+Fotos são públicas, ordenadas por data da foto, criação e identificador, em ordem decrescente. Clique na imagem para ampliar; use **Fechar** ou Escape para sair. O foco volta ao controle de origem.
 
-## Banco e autenticação
+No **Modo de edição**, use **Adicionar foto**, **Editar foto** ou **Excluir**. Legenda é opcional (até 1.000 caracteres); data é obrigatória. JPEG, PNG e WebP são aceitos, até 20 MB na origem. O navegador aplica orientação EXIF e redesenha a imagem em Canvas, preserva proporção, limita o maior lado a 1920 px e gera WebP com qualidade 82%, sem os metadados originais. A saída deve ter até 5 MB; nomes usam UUID aleatório, sem o nome original. Navegadores sem suporte ao processamento recebem uma mensagem clara.
 
-A migration em `supabase/migrations/` cria:
+Operações refletem imediatamente na grade. Cada upload começa com uma intenção persistida em `gallery_cleanup`. Ao inserir a foto, um trigger apaga essa intenção na mesma transação. Se o registro falhar, o cliente remove o arquivo; se houver falha de rede, a intenção permanece recuperável.
 
-- Exatamente duas listas fixas e presentes com enums, restrições, índices e normalização de etiquetas.
-- RLS com leitura pública. Escrita de presentes limitada ao UUID administrativo; outras contas autenticadas também são bloqueadas.
-- Trigger que define datas no banco, preserva criação e limpa `received_at` ao voltar para desejado.
+A exclusão do registro cria uma tarefa de limpeza na mesma transação. O cliente remove o objeto e depois a tarefa. Falhas são informadas sem perder o caminho do objeto. Tarefas com mais de 15 minutos aparecem para o administrador em **Retomar limpeza**, inclusive após recarga ou em outro dispositivo. Esse intervalo evita interferir em uploads em andamento. A política do Storage impede remover uma imagem ainda ligada a uma foto. A fila é privada e não usa tarefas pagas ou chaves secretas.
 
-As listas são fixas e não permitem escrita pelo cliente, inclusive administrativo. A migration resolve o UUID administrativo pelo e-mail existente em `auth.users`; não cria nem altera senha.
+## Autenticação e segurança
 
-A conta `fernando.greca@integra.do` já existia no projeto. Novos cadastros e login anônimo estão desabilitados. A URL do site no Supabase Auth é a URL do GitHub Pages.
+**Modo de edição** solicita a senha compartilhada existente. Use **Sair** em dispositivos compartilhados. Não há cadastro público nem login anônimo.
 
-Para instalar em outro projeto:
+O cliente usa somente URL e chave publicável do Supabase. A função SQL `is_admin()` consulta o UID autenticado e o compara com a conta administrativa resolvida na migration. Ela é `SECURITY INVOKER`, como todos os triggers. A interface usa seu resultado para mostrar controles; a autorização definitiva é feita por RLS no banco e no Storage. Nenhuma chave privilegiada ou senha é necessária para build ou deploy.
 
-1. Crie a conta administrativa no painel **Authentication → Users → Add user**, com e-mail confirmado e senha definida diretamente pelo proprietário.
-2. Desabilite **Allow new users to sign up** e **Allow anonymous sign-ins** em **Sign In / Providers**.
-3. Ajuste e-mail na migration e UUID/e-mail em `src/lib/config.ts`; ajuste o UUID em `supabase/functions/extract-product/index.ts`.
-4. Aplique as migrations por conexão administrativa autorizada e publique a função.
-5. Ajuste URL/chave publicável, basePath e origens da função. Não use chaves secretas no cliente.
+## Migrations e políticas
 
-`supabase/tests/rls.sql` executa INSERT/UPDATE/DELETE como administrador e testa bloqueio para visitante e outro UUID. Tudo ocorre numa transação terminada com `ROLLBACK`. Nenhum dado de teste é mantido.
+- `20260915152001_initial_wishlists.sql`: duas listas fixas, tabela `gifts`, enums, índices, normalização e datas, leitura pública e escrita limitada ao administrador.
+- `20260915172429_portal_gallery.sql`: `gallery_photos`, `gallery_cleanup`, índices, constraints, triggers e `is_admin()`. Resolve a conta existente por e-mail diretamente em `auth.users`, sem modificar credenciais ou presentes.
 
-## Extração de metadados
+Em `gallery_photos`, `public_read` permite SELECT público; `admin_insert`, `admin_update` (USING + WITH CHECK) e `admin_delete` restringem escrita ao UID administrativo. Em `gallery_cleanup`, SELECT/INSERT/DELETE são exclusivos do administrador.
 
-`supabase/functions/extract-product/` contém parser e transporte testáveis:
+O bucket público `couple-gallery` limita arquivos a 5 MB e MIME types JPEG, PNG e WebP. As políticas `gallery_admin_select`, `gallery_admin_insert` e `gallery_admin_delete` atuam somente nesse bucket. Upload exige caminho UUID `.webp` com intenção registrada; exclusão exige tarefa pendente e ausência de foto vinculada. Não há UPDATE ou upsert de objetos.
 
-1. JSON-LD `Product` (incluindo arrays e `@graph`).
-2. Open Graph.
-3. Metatags de preço e moeda.
-4. Título HTML.
+As migrations foram aplicadas pelo conector Supabase. A função de extração antiga foi removida localmente e do Supabase após conferir que o formulário era seu único consumidor e que não existiam referências em funções do banco. Seu código anterior permanece no histórico Git.
 
-Aceita somente HTTP/HTTPS nas portas padrão, sem credenciais. Bloqueia hosts locais, IPs privados/reservados e DNS que retorne qualquer IP não público. No Edge Runtime, usa conexão TCP nativa seguida de TLS com o nome original da loja. Isso mantém o IP verificado e preserva Host e TLS/SNI, sem nova resolução DNS. A camada de compatibilidade node:https do Supabase não preserva essa separação e não é usada em produção. Revalida cada redirecionamento (até três), limita a leitura a 2 MB e nove segundos e rejeita conteúdo não HTML/comprimido.
-
-A função valida o JWT em **Auth `/user`** e confere o UUID administrativo antes de ler a URL. `verify_jwt = false` desliga somente a validação legada do gateway; a autenticação é obrigatória no handler, compatível com as chaves atuais. Não se usa chave administrativa. CORS aceita somente `https://fernandogreca.github.io`, `http://localhost:3000` e `http://127.0.0.1:3000`.
-
-Não são copiados arquivos para Storage. Texto extraído é convertido em texto puro, URLs são validadas e React não renderiza HTML de lojas.
+Execute `supabase/tests/rls.sql` e `supabase/tests/gallery-rls.sql` por uma conexão administrativa autorizada. Ambos usam transação e ROLLBACK: exercitam papéis anon, não administrador e administrador sem deixar registros de teste. O teste do Storage insere apenas metadados dentro da transação; operações de arquivos devem sempre usar a API Storage.
 
 ## Publicação
 
-GitHub Pages usa **Settings → Pages → Source → GitHub Actions**. O workflow `.github/workflows/pages.yml` roda lint, unitários, build e E2E antes de publicar `out/` em pushes para `main`. Pull requests executam as verificações sem publicar.
+Remote: `git@github.com:FernandoGreca/fer-e-gabi.git`. O repositório deve continuar público. GitHub Pages usa **Settings → Pages → Source → GitHub Actions**, com HTTPS.
 
-O workflow usa `GITHUB_TOKEN` fornecido automaticamente pelo GitHub, com `contents: read`, e `pages: write` / `id-token: write` apenas no job de deploy. Não exige segredo adicional. URL e chave publicável são configurações públicas, também presentes em `.env.example`.
+O workflow `.github/workflows/pages.yml` executa lint, tipos, unitários, build e E2E. Após sucesso em `main`, publica `out/`. Usa `GITHUB_TOKEN` automático com permissões de deploy somente no job correspondente. Migrations são aplicadas separadamente via Supabase; não há backend Next.js no Pages.
 
-Migrations e Edge Functions não são publicadas pelo Pages; aplique-as separadamente pelo conector Supabase ou CLI autenticada. Nunca configure senha administrativa, chave secreta, chave de serviço ou token de gestão como variável `NEXT_PUBLIC_*`.
+A URL de Auth no Supabase é `https://fernandogreca.github.io/fer-e-gabi/`. Para outro projeto, crie a conta administrativa no painel, desabilite novos cadastros, ajuste o e-mail nas migrations/configuração e aplique as migrations. Nunca adicione segredos a `NEXT_PUBLIC_*`.
 
-## Testes e limites
+## Verificações e limites
 
-- Unitários: validação, normalização, filtros combinados, ordenação, parser, SSRF, redirecionamentos, limite de resposta, timeout e tipo de conteúdo.
-- E2E: navegador desktop e celular, consulta, administração, histórico, falha de extração, validação, falha de API, recarga, logout e auditoria Axe WCAG A/AA. Os testes repetíveis usam API/Auth simulados, sem senha real.
-- Integração real: `npm run test:public` verifica leituras, bloqueio de escrita anônima, cadastro desabilitado, login inválido, autenticação e CORS da função. RLS é exercitada diretamente no banco com o arquivo SQL transacional.
+- Unitários: presentes, datas, ordenação da galeria, tipos/tamanho de arquivo, proporção e caminhos seguros.
+- E2E desktop e celular: home, navegação, recarga, permissões visuais, cadastro manual sem chamadas de função, CRUD de presentes/fotos, histórico, foco/Escape, Axe WCAG A/AA, falhas de API e limpeza de uploads.
+- API real: leitura pública, escrita negada, Storage anônimo bloqueado, `is_admin()` falso sem sessão e cadastro desabilitado.
+- Banco real: testes transacionais de RLS, triggers e fila; verificação de bucket e políticas; advisors de segurança e desempenho.
 
-O plano gratuito pode pausar o Supabase por inatividade; reative pelo painel se necessário. Lojas podem bloquear extração ou hotlink de imagens. O preenchimento manual continua disponível. O Security Advisor alerta sobre proteção contra senhas vazadas; essa opção não foi habilitada para preservar o escopo gratuito.
-
-## Referências
-
-- [Next.js: Static Exports](https://nextjs.org/docs/app/guides/static-exports)
-- [GitHub Pages: Custom Workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
-- [Supabase: RLS](https://supabase.com/docs/guides/database/postgres/row-level-security)
-- [Supabase: API keys e Edge Functions](https://supabase.com/docs/guides/getting-started/api-keys)
-- [Supabase: segurança de senhas](https://supabase.com/docs/guides/auth/password-security)
+Os advisors não apontaram problemas de segurança novos. Permanece o aviso preexistente de [proteção contra senhas vazadas](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection), não habilitada no plano gratuito. [Índices ainda sem uso](https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index) são esperados enquanto as tabelas estão vazias. Supabase gratuito pode pausar por inatividade; reative no painel se necessário.

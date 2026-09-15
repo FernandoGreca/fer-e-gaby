@@ -2,7 +2,7 @@ import http from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 const root = path.resolve("out"),
-  base = "/lista-de-presentes";
+  base = "/fer-e-gabi";
 http
   .createServer(async (req, res) => {
     try {
@@ -40,5 +40,5 @@ http
     }
   })
   .listen(3000, "0.0.0.0", () =>
-    console.log("Static preview: http://localhost:3000/lista-de-presentes/"),
+    console.log("Static preview: http://localhost:3000/fer-e-gabi/"),
   );

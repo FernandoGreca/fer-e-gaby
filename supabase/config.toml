@@ -1,11 +1,7 @@
-project_id = "lista-de-presentes"
+project_id = "fer-e-gabi"
 
 [auth]
-site_url = "https://fernandogreca.github.io/lista-de-presentes/"
-additional_redirect_urls = ["http://localhost:3000/lista-de-presentes/"]
+site_url = "https://fernandogreca.github.io/fer-e-gabi/"
+additional_redirect_urls = ["http://localhost:3000/fer-e-gabi/"]
 enable_signup = false
 enable_anonymous_sign_ins = false
-
-[functions.extract-product]
-# JWT is validated with Auth /user and exact admin UUID in the handler.
-verify_jwt = false

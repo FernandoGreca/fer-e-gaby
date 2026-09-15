@@ -1,17 +1,14 @@
 "use client";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Sparkles } from "lucide-react";
 import {
   giftSchema,
-  httpUrl,
   priorities,
   type Gift,
   type GiftInput,
   type Wishlist,
 } from "@/lib/gifts";
-import { supabase } from "@/lib/supabase";
 import { Modal } from "./modal";
 
 export function GiftForm({
@@ -29,16 +26,11 @@ export function GiftForm({
   onClose: () => void;
   pending: boolean;
 }) {
-  const [extracting, setExtracting] = useState(false),
-    [notice, setNotice] = useState("");
-  const requestId = useRef(0);
   const [receiptInput, setReceiptInput] = useState<GiftInput | null>(null);
   const {
     register,
     handleSubmit,
-    getValues,
-    setValue,
-    formState: { errors, dirtyFields },
+    formState: { errors },
   } = useForm<GiftInput>({
     resolver: zodResolver(giftSchema),
     defaultValues: {
@@ -55,54 +47,6 @@ export function GiftForm({
       status: gift?.status ?? "wanted",
     },
   });
-  async function extract(url: string) {
-    if (!httpUrl(url)) {
-      setNotice(
-        "Cole um link HTTP ou HTTPS válido. Você também pode preencher tudo manualmente.",
-      );
-      return;
-    }
-    const id = ++requestId.current;
-    const before = getValues();
-    setExtracting(true);
-    setNotice("Buscando informações na loja…");
-    try {
-      const { data, error } = await supabase.functions.invoke(
-        "extract-product",
-        { body: { url } },
-      );
-      if (id !== requestId.current || getValues("product_url") !== url) return;
-      if (error) throw error;
-      for (const [field, key] of [
-        ["name", "name"],
-        ["image_url", "imageUrl"],
-        ["price", "price"],
-        ["currency", "currency"],
-      ] as const) {
-        if (
-          data?.[key] != null &&
-          getValues(field) === before[field] &&
-          (!before[field] || (field === "currency" && !dirtyFields.currency))
-        )
-          setValue(field, String(data[key]), {
-            shouldValidate: true,
-            shouldDirty: true,
-          });
-      }
-      setNotice(
-        data.warnings?.length
-          ? `Preenchimento parcial. ${data.warnings.join(" ")} Revise os campos abaixo.`
-          : "Informações encontradas. Confira os dados antes de salvar.",
-      );
-    } catch {
-      if (id === requestId.current)
-        setNotice(
-          "Esta loja não permitiu a leitura. Preencha os campos manualmente; você pode salvar normalmente.",
-        );
-    } finally {
-      if (id === requestId.current) setExtracting(false);
-    }
-  }
   const field = (
     key: keyof GiftInput,
     label: string,
@@ -129,7 +73,6 @@ export function GiftForm({
       description="Um detalhe especial para a nossa lista. Campos com * são obrigatórios."
       onClose={() => {
         if (!pending) {
-          requestId.current++;
           onClose();
         }
       }}
@@ -143,43 +86,10 @@ export function GiftForm({
         })}
       >
         <fieldset disabled={pending}>
-          <div className="import-box">
-            <label className="field">
-              Link do produto *
-              <input
-                {...register("product_url")}
-                type="url"
-                placeholder="https://loja.com/produto"
-                onPaste={(event) => {
-                  const value = event.clipboardData.getData("text").trim();
-                  if (httpUrl(value)) {
-                    event.preventDefault();
-                    setValue("product_url", value, { shouldDirty: true });
-                    void extract(value);
-                  }
-                }}
-                aria-invalid={!!errors.product_url}
-              />
-              {errors.product_url && (
-                <span className="field-error">
-                  {errors.product_url.message}
-                </span>
-              )}
-            </label>
-            <button
-              className="button secondary"
-              type="button"
-              disabled={extracting}
-              onClick={() => void extract(getValues("product_url"))}
-            >
-              <Sparkles size={16} />
-              {extracting ? "Buscando…" : "Preencher pelo link"}
-            </button>
-            <p className="helper" role="status">
-              {notice ||
-                "Ao colar um link, tentamos encontrar nome, imagem e preço."}
-            </p>
-          </div>
+          {field("product_url", "Link do produto *", {
+            type: "url",
+            placeholder: "https://loja.com/produto",
+          })}
           {field("name", "Nome do presente *", { maxLength: 200 })}
           <div className="form-grid">
             <label className="field">
@@ -252,7 +162,7 @@ export function GiftForm({
             </p>
           )}
           {receiptInput && (
-            <div className="import-box" role="alert">
+            <div className="form-callout" role="alert">
               <p>
                 Confirmar que este presente já foi ganho? Ele será guardado no
                 histórico.
