@@ -47,7 +47,7 @@ export function imageDimensions(width: number, height: number) {
   };
 }
 export function validObjectPath(path: string) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.webp$/.test(
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(?:webp|jpg)$/.test(
     path,
   );
 }
@@ -86,20 +86,22 @@ export async function compressImage(file: File): Promise<Blob> {
     if (!context)
       throw new Error("Este navegador não conseguiu processar a imagem.");
     context.drawImage(bitmap, 0, 0, size.width, size.height);
-    const blob = await new Promise<Blob>((resolve, reject) =>
-      canvas.toBlob(
-        (value) =>
-          value
-            ? resolve(value)
-            : reject(new Error("Não foi possível comprimir a imagem.")),
-        "image/webp",
-        0.82,
-      ),
-    );
-    if (blob.type !== "image/webp")
-      throw new Error(
-        "Este navegador não consegue gerar WebP. Tente um navegador atualizado.",
+    const toBlob = (type: string) =>
+      new Promise<Blob>((resolve, reject) =>
+        canvas.toBlob(
+          (value) =>
+            value
+              ? resolve(value)
+              : reject(new Error("Não foi possível comprimir a imagem.")),
+          type,
+          0.82,
+        ),
       );
+    let blob = await toBlob("image/webp");
+    // Some WebKit versions silently return PNG when WebP encoding is unavailable.
+    if (blob.type !== "image/webp") blob = await toBlob("image/jpeg");
+    if (blob.type !== "image/jpeg" && blob.type !== "image/webp")
+      throw new Error("Este navegador não conseguiu preparar a imagem.");
     if (blob.size > MAX_UPLOAD_BYTES)
       throw new Error(
         "A foto processada excedeu 5 MB. Escolha uma imagem menor.",

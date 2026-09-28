@@ -25,8 +25,11 @@ describe("gallery image validation", () => {
     expect(imageDimensions(800, 600)).toEqual({ width: 800, height: 600 });
     expect(() => imageDimensions(0, 100)).toThrow();
   });
-  it("only accepts unpredictable flat WebP paths", () => {
+  it("only accepts unpredictable flat WebP or JPEG paths", () => {
     expect(validObjectPath("c231ff00-521a-4f37-b965-63b7891f1767.webp")).toBe(
+      true,
+    );
+    expect(validObjectPath("c231ff00-521a-4f37-b965-63b7891f1767.jpg")).toBe(
       true,
     );
     for (const path of [
@@ -34,6 +37,7 @@ describe("gallery image validation", () => {
       "file.jpg",
       "https://example.com/x",
       "bucket/file.webp",
+      "c231ff00-521a-4f37-b965-63b7891f1767.png",
     ])
       expect(validObjectPath(path)).toBe(false);
   });

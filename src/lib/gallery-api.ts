@@ -54,7 +54,8 @@ export async function uploadPhoto(
   input: PhotoInput,
   onStatus: (s: string) => void,
 ) {
-  const path = crypto.randomUUID() + ".webp";
+  const isWebP = blob.type === "image/webp";
+  const path = crypto.randomUUID() + (isWebP ? ".webp" : ".jpg");
   const intent = await supabase
     .from("gallery_cleanup")
     .insert({ object_path: path });
@@ -65,7 +66,7 @@ export async function uploadPhoto(
   try {
     onStatus("Enviando foto…");
     const upload = await bucket().upload(path, blob, {
-      contentType: "image/webp",
+      contentType: isWebP ? "image/webp" : "image/jpeg",
       cacheControl: "31536000",
       upsert: false,
     });

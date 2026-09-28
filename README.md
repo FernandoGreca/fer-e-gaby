@@ -44,7 +44,7 @@ O cadastro é inteiramente manual. Link HTTP/HTTPS é obrigatório. Colar ou mod
 
 Fotos são públicas, ordenadas por data da foto, criação e identificador, em ordem decrescente. Clique na imagem para ampliar; use **Fechar** ou Escape para sair. O foco volta ao controle de origem.
 
-No **Modo de edição**, use **Adicionar foto**, **Editar foto** ou **Excluir**. Legenda é opcional (até 1.000 caracteres); data é obrigatória. JPEG, PNG e WebP são aceitos, até 20 MB na origem. O navegador aplica orientação EXIF e redesenha a imagem em Canvas, preserva proporção, limita o maior lado a 1920 px e gera WebP com qualidade 82%, sem os metadados originais. A saída deve ter até 5 MB; nomes usam UUID aleatório, sem o nome original. Navegadores sem suporte ao processamento recebem uma mensagem clara.
+No **Modo de edição**, use **Adicionar foto**, **Editar foto** ou **Excluir**. Legenda é opcional (até 1.000 caracteres); data é obrigatória. JPEG, PNG e WebP são aceitos, até 20 MB na origem. O navegador aplica orientação EXIF e redesenha a imagem em Canvas, preserva proporção, limita o maior lado a 1920 px e gera WebP com qualidade 82%, sem os metadados originais. Se o navegador não conseguir gerar WebP, a imagem é codificada como JPEG. A saída deve ter até 5 MB; nomes usam UUID aleatório, sem o nome original.
 
 Operações refletem imediatamente na grade. Cada upload começa com uma intenção persistida em `gallery_cleanup`. Ao inserir a foto, um trigger apaga essa intenção na mesma transação. Se o registro falhar, o cliente remove o arquivo; se houver falha de rede, a intenção permanece recuperável.
 
@@ -60,10 +60,11 @@ O cliente usa somente URL e chave publicável do Supabase. A função SQL `is_ad
 
 - `20260915152047_initial_wishlists.sql`: duas listas fixas, tabela `gifts`, enums, índices, normalização e datas, leitura pública e escrita limitada ao administrador.
 - `20260915172949_portal_gallery.sql`: `gallery_photos`, `gallery_cleanup`, índices, constraints, triggers e `is_admin()`. Resolve a conta existente por e-mail diretamente em `auth.users`, sem modificar credenciais ou presentes.
+- `20260928162501_gallery_jpeg_fallback.sql`: permite objetos `.jpg` na galeria e atualiza a política de upload do Storage.
 
 Em `gallery_photos`, `public_read` permite SELECT público; `admin_insert`, `admin_update` (USING + WITH CHECK) e `admin_delete` restringem escrita ao UID administrativo. Em `gallery_cleanup`, SELECT/INSERT/DELETE são exclusivos do administrador.
 
-O bucket público `couple-gallery` limita arquivos a 5 MB e MIME types JPEG, PNG e WebP. As políticas `gallery_admin_select`, `gallery_admin_insert` e `gallery_admin_delete` atuam somente nesse bucket. Upload exige caminho UUID `.webp` com intenção registrada; exclusão exige tarefa pendente e ausência de foto vinculada. Não há UPDATE ou upsert de objetos.
+O bucket público `couple-gallery` limita arquivos a 5 MB e MIME types JPEG, PNG e WebP. As políticas `gallery_admin_select`, `gallery_admin_insert` e `gallery_admin_delete` atuam somente nesse bucket. Upload exige caminho UUID `.webp` ou `.jpg` com intenção registrada; exclusão exige tarefa pendente e ausência de foto vinculada. Não há UPDATE ou upsert de objetos.
 
 As migrations foram aplicadas pelo conector Supabase. A função de extração antiga foi removida localmente e do Supabase após conferir que o formulário era seu único consumidor e que não existiam referências em funções do banco. Seu código anterior permanece no histórico Git.
 
