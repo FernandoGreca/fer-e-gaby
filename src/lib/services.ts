@@ -1,4 +1,4 @@
-import { Camera, Gift } from "lucide-react";
+import { Camera, Gift, MapPin } from "lucide-react";
 export const services = [
   {
     href: "/presentes",
@@ -17,5 +17,14 @@ export const services = [
     action: "Ver nossas memórias",
     icon: Camera,
     theme: "lavender",
+  },
+  {
+    href: "/lugares",
+    title: "Lugares para ir",
+    description:
+      "Uma lista de destinos, passeios e experiências que queremos viver juntos.",
+    action: "Descobrir nossos planos",
+    icon: MapPin,
+    theme: "blush",
   },
 ] as const;

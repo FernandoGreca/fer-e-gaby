@@ -1044,7 +1044,7 @@ footer > svg {
   margin: 0 auto 72px;
   padding: 0 32px;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 28px;
 }
 .service-card {
@@ -1204,6 +1204,199 @@ footer > svg {
   border-radius: 12px;
   line-height: 1.6;
 }
+.places-toolbar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.5fr) repeat(2, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 0 0 24px;
+}
+.places-toolbar input,
+.places-toolbar select {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #ddcfd3;
+  border-radius: 8px;
+  background: #fffdfb;
+  padding: 9px 12px;
+  color: var(--ink);
+}
+.places-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+.place-card {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.place-cover {
+  width: 100%;
+  aspect-ratio: 1.45;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f6e9eb, #efebf5);
+  color: var(--rose);
+}
+.place-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.place-card-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.place-card-body h2 {
+  font: 24px/1.3 Georgia, serif;
+  overflow-wrap: anywhere;
+}
+.place-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 0 0 10px;
+}
+.place-pill {
+  border-radius: 20px;
+  padding: 4px 9px;
+  background: var(--lavender);
+  color: #6e567f;
+  font-size: 11px;
+}
+.place-pill.status-visited {
+  background: #eaf1e8;
+  color: #526e4c;
+}
+.place-description {
+  color: var(--muted);
+  margin: 10px 0;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.place-location,
+.place-date {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 5px;
+}
+.place-card-links {
+  display: flex;
+  gap: 16px;
+  margin-top: auto;
+  padding-top: 16px;
+  color: var(--rose);
+  font-size: 12px;
+  font-weight: 600;
+}
+.place-card-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.place-thumbnails,
+.place-file-previews {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+.place-thumbnail {
+  position: relative;
+  width: 82px;
+  height: 82px;
+  border: 2px solid transparent;
+  border-radius: 9px;
+  overflow: hidden;
+  padding: 0;
+  background: var(--blush);
+}
+.place-thumbnail-wrap {
+  position: relative;
+}
+.place-thumbnail-wrap .remove-photo {
+  position: absolute;
+  right: -5px;
+  top: -5px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: white;
+  border: 1px solid var(--line);
+  color: #a33643;
+}
+.place-thumbnail.selected {
+  border-color: var(--rose);
+}
+.place-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.place-photo-controls {
+  position: absolute;
+  inset: auto 0 0;
+  background: #fffE;
+  display: flex;
+  justify-content: center;
+  font-size: 9px;
+}
+.place-file-preview {
+  position: relative;
+  width: 82px;
+  height: 82px;
+}
+.place-file-preview img {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+}
+.place-file-preview button {
+  position: absolute;
+  right: 3px;
+  top: 3px;
+  background: white;
+  border-radius: 50%;
+  padding: 4px;
+}
+.place-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 14px;
+}
+.place-form-grid .field.full-width {
+  grid-column: 1 / -1;
+}
+.place-modal {
+  max-width: 760px;
+}
+.place-details-photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.place-details-photos img {
+  width: 100%;
+  aspect-ratio: 1.2;
+  object-fit: cover;
+  border-radius: 9px;
+}
+.place-location,
+.place-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 input[type="file"] {
   max-width: 100%;
   padding: 12px;
@@ -1225,6 +1418,12 @@ input::file-selector-button {
     gap: 16px;
   }
   .gallery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .places-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .service-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .home-hero h1 {
@@ -1271,6 +1470,11 @@ input::file-selector-button {
   .gallery-grid {
     grid-template-columns: 1fr;
     gap: 22px;
+  }
+  .places-grid,
+  .places-toolbar,
+  .place-form-grid {
+    grid-template-columns: 1fr;
   }
   .gallery-section .list-heading {
     gap: 18px;

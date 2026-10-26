@@ -124,7 +124,7 @@ test("home has functional services and direct routes are accessible", async ({
 }, info) => {
   await gallerySetup(page);
   await page.goto("./");
-  await expect(page.locator(".service-card")).toHaveCount(2);
+  await expect(page.locator(".service-card")).toHaveCount(3);
   await expect(
     page.getByRole("heading", { name: "A vida fica mais bonita" }),
   ).toBeVisible();
@@ -188,7 +188,7 @@ test("home has functional services and direct routes are accessible", async ({
     .getByRole("navigation")
     .getByRole("link", { name: "Início", exact: true })
     .click();
-  await expect(page.locator(".service-card")).toHaveCount(2);
+  await expect(page.locator(".service-card")).toHaveCount(3);
 });
 test("admin uploads compressed photo, edits date, cancels and confirms deletion", async ({
   page,
